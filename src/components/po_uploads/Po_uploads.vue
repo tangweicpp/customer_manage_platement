@@ -118,6 +118,8 @@
               <el-upload
                 class="upload-demo"
                 ref="upload"
+                name="poFile"
+                :data="poForm"
                 :disabled="authenStatus==0?true:false"
                 :accept="scope.row.accept"
                 action="http://10.160.31.115:5000/upload_po_file"
@@ -170,12 +172,9 @@ export default {
           { min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur" }
         ],
         delayDays: [
-          { required: false, message: "请输入延期天数", trigger: "blur" },
           {
-            type: "number",
-            min: 1,
-            max: 5,
-            message: "长度在 1 到 5 个字符",
+            required: false,
+            message: "请输入延期天数",
             trigger: "blur"
           }
         ]
