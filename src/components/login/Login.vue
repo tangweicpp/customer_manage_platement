@@ -9,7 +9,7 @@
           <el-input placeholder="请输入密码" v-model="ruleForm.password" show-password></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="startLogin()">登录</el-button>
+          <el-button type="primary" v-preventReClick @click="startLogin">登录</el-button>
           <el-button plain @click="resetForm()">重置</el-button>
         </el-form-item>
       </el-form>
@@ -56,14 +56,6 @@ export default {
     startLogin() {
       this.$refs.ruleForm.validate(valid => {
         if (valid) {
-          // alert("submit!");
-          // 0.调用后台校验
-          // .get("http://10.160.31.115:80/comments/index.php", {
-          //   params: {
-          //     username: this.ruleForm.username,
-          //     password: this.ruleForm.password
-          //   }
-          // })
           this.$axios
             .post(
               "http://10.160.31.115:5000/login",

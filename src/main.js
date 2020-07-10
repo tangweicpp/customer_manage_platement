@@ -13,6 +13,8 @@ import './assets/css/common.css'
 import axios from 'axios'
 // 全局引入qs
 import qs from 'qs'
+// 防止多次点击,重复提交
+import preventReClick from './store/preventReClick'
 
 Vue.prototype.$axios = axios;
 Vue.prototype.$qs = qs;
