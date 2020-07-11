@@ -129,7 +129,12 @@
                 :on-exceed="handleExceed"
                 :file-list="fileList"
               >
-                <el-button slot="trigger" size="small" type="success" @click="handleUpload">选取文件</el-button>
+                <el-button
+                  slot="trigger"
+                  size="small"
+                  type="success"
+                  @click="handleUpload(scope.row)"
+                >选取文件</el-button>
               </el-upload>
             </template>
           </el-table-column>
@@ -153,6 +158,7 @@
 export default {
   data() {
     return {
+      selFile: "",
       authenStatus: 1,
       // dialogVisible: false,
       activeName: "first",
@@ -211,6 +217,7 @@ export default {
       // console.log(tab, event);
     },
     handleCustCodeChange() {
+      // 获取客户资料
       this.$axios
         .post(
           "http://10.160.31.115:5000/po_template",
@@ -222,8 +229,14 @@ export default {
           console.log(res.data);
           this.tableData = res.data;
         });
+
+      // 清除上传列表
+      // this.$refs.upload.clearFiles();
+      this.fileList = [];
     },
-    handleUpload() {
+    handleUpload(row) {
+      console.log(row);
+      this.poForm["url"] = row.file_name;
       this.$refs.poForm.validate(vallid => {
         if (!vallid) {
           this.authenStatus = 0;
