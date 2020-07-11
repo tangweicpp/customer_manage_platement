@@ -236,7 +236,7 @@ export default {
     },
     handleUpload(row) {
       console.log(row);
-      this.poForm["url"] = row.file_name;
+      this.poForm["template_id"] = row.file_id;
       this.$refs.poForm.validate(vallid => {
         if (!vallid) {
           this.authenStatus = 0;
