@@ -140,7 +140,108 @@
           </el-table-column>
         </el-table>
       </el-tab-pane>
-      <el-tab-pane label="模板配置" name="second">模板配置</el-tab-pane>
+      <el-tab-pane label="模板配置" name="second">
+        <el-form
+          :inline="true"
+          :model="poTemplate"
+          class="demo-form-inline"
+          ref="poTemplate"
+          :rules="rules"
+        >
+          <el-form-item label="客户代码" prop="custCode">
+            <el-select
+              v-model="poTemplate.custCode"
+              placeholder="请选择"
+              filterable
+              clearable
+              ref="selCustCode"
+            >
+              <el-option
+                v-for="item in custCodeList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="订单类型" prop="poType">
+            <el-select
+              v-model="poTemplate.poType"
+              placeholder="请选择"
+              filterable
+              clearable
+              ref="selPoType"
+            >
+              <el-option
+                v-for="item in poTypeList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="文件数量" prop="poType">
+            <el-input-number v-model="num" @change="handleChange" :min="1" :max="3" label="描述文字"></el-input-number>
+          </el-form-item>
+        </el-form>
+
+        <el-table :data="tableData2" border style="width: 100%">
+          <el-table-column label="序号" width="180">
+            <template slot-scope="scope">
+              <i class="el-icon-time"></i>
+              <span style="margin-left: 10px">{{ scope.$index + 1 }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="模板文件" width="180">
+            <template slot-scope="scope">
+              <el-upload
+                class="upload-demo"
+                action="https://jsonplaceholder.typicode.com/posts/"
+                :on-preview="handlePreview"
+                :on-remove="handleRemove"
+                :before-remove="beforeRemove"
+                multiple
+                :limit="3"
+                :on-exceed="handleExceed"
+                :file-list="fileList"
+              >
+                <el-button size="small" type="primary">点击上传</el-button>
+                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+              </el-upload>
+            </template>
+          </el-table-column>
+          <el-table-column prop="address" label="模板示意">
+            <template slot-scope="scope">
+              <el-upload
+                class="upload-demo"
+                action="https://jsonplaceholder.typicode.com/posts/"
+                :on-preview="handlePreview"
+                :on-remove="handleRemove"
+                :file-list="fileList"
+                list-type="picture"
+              >
+                <el-button size="small" type="primary">点击上传</el-button>
+                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+              </el-upload>
+            </template>
+          </el-table-column>
+          <el-table-column prop="address" label="关键字段">
+            <el-button type="text" size="small">编辑</el-button>
+          </el-table-column>
+          <el-table-column prop="address" label="文件层级">
+            <el-select v-model="value" placeholder="请选择">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-table-column>
+        </el-table>
+
+        <!-- 模板配置 -->
+      </el-tab-pane>
       <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
       <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
     </el-tabs>
@@ -158,6 +259,7 @@
 export default {
   data() {
     return {
+      input: "",
       selFile: "",
       authenStatus: 1,
       // dialogVisible: false,
@@ -192,6 +294,7 @@ export default {
         isDelay: false,
         delayDays: ""
       },
+      poTemplate: { custCode: "", poType: "普通销售订单" },
       custCodeList: [],
       poTypeList: [
         { value: "普通销售订单", label: "普通销售订单" },
@@ -201,8 +304,18 @@ export default {
         { value: "免费订单", label: "免费订单" }
       ],
       tableData: [],
+      tableData2: [
+        {
+          date: "2016-05-02",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1518 弄"
+        }
+      ],
 
-      fileList: []
+      fileList: [],
+
+      // 模板数据
+      num: 1
     };
   },
   // 创建钩子函数
@@ -287,6 +400,15 @@ export default {
       } else {
         this.rules.poPrice[0].required = false;
       }
+    },
+    handleChange(value) {
+      console.log(value);
+      console.log(this.num);
+      if (value > this.tableData2.length) {
+        this.tableData2.push({});
+      } else {
+        this.tableData2.pop();
+      }
     }
   }
 };
@@ -299,5 +421,18 @@ export default {
 
 .el-table .success-row {
   background: #f0f9eb;
+}
+
+.demo-table-expand {
+  font-size: 0;
+}
+.demo-table-expand label {
+  width: 90px;
+  color: #99a9bf;
+}
+.demo-table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+  width: 50%;
 }
 </style>
