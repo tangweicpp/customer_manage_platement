@@ -247,13 +247,13 @@
                   slot="trigger"
                   size="small"
                   type="success"
+                  :disabled="btnChangeEnable"
                   @click="uploadPoClick(scope.row)"
                 >选取文件</el-button>
               </el-upload>
               <el-progress
                 v-if="scope.row.show_progress_flag"
                 :percentage="scope.row.load_progress"
-                :format="format"
               ></el-progress>
             </template>
           </el-table-column>
@@ -378,6 +378,7 @@
 export default {
   data() {
     return {
+      btnChangeEnable: false,
       gridDataTotal: [],
       gridDataDetail: [],
       innerVisible: false,
@@ -496,20 +497,28 @@ export default {
       this.$refs.poForm.validate(vallid => {
         if (!vallid) {
           this.authenStatus = 0;
+          console.log(row);
         } else {
           this.authenStatus = 1;
+          this.fileList = [];
+          row.show_filelist_flag = false;
+          row.load_progress = 0;
         }
       });
     },
     handleBeforeupload() {
       console.log("before upload");
+      this.btnChangeEnable = true;
     },
     handleProgress(event, file, fileList, row) {
       row.show_progress_flag = true;
       let key = row.file_id.toString();
       this.timer[key] = setInterval(this.updateLoadProgress, 200, row);
     },
-    handleChange() {},
+    handleChange(files, fileList) {
+      console.log("file", files.length);
+      console.log("fileList", fileList.length);
+    },
     updateLoadProgress(row) {
       this.$axios
         .get("http://10.160.31.115:5000/update_progress?userKey=" + row.file_id)
@@ -524,6 +533,7 @@ export default {
         });
     },
     handleSuccess(res, file, fileList, row) {
+      this.btnChangeEnable = false;
       row.show_filelist_flag = true;
       row.show_progress_flag = false;
       // 1.成功提示
@@ -532,7 +542,6 @@ export default {
         type: "success",
         duration: 800
       });
-
       this.gridDataTotal = res.total_data;
       this.gridDataDetail = res.detail_data;
       this.outerVisible = true;
