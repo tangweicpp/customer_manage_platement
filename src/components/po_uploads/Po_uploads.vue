@@ -63,26 +63,7 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="邮件正文" prop="mailContent">
-            <el-col :span="50">
-              <el-input
-                v-model="poForm.mailContent"
-                type="textarea"
-                autosize
-                clearable
-                placeholder="请输入内容"
-              ></el-input>
-            </el-col>
-          </el-form-item>
-        </el-form>
 
-        <el-form
-          :inline="true"
-          :model="poForm"
-          class="demo-form-inline"
-          ref="poForm"
-          :rules="rules"
-        >
           <el-form-item label="报价单号" prop="poPrice">
             <el-input
               v-model="poForm.poPrice"
@@ -91,10 +72,11 @@
               :disabled="!this.rules.poPrice[0].required"
             ></el-input>
           </el-form-item>
-          <el-form-item prop="isDelay">
+          <!-- <el-form-item prop="isDelay">
             <el-checkbox v-model="poForm.isDelay" @change="poItemChange">延长账期</el-checkbox>
-          </el-form-item>
+          </el-form-item>-->
           <el-form-item prop="delayDays">
+            <el-checkbox v-model="poForm.isDelay" @change="poItemChange">延长账期</el-checkbox>
             <div v-if="poForm.isDelay === true">
               <el-input v-model="poForm.delayDays" placeholder="请输入延长的天数"></el-input>
             </div>
@@ -102,9 +84,34 @@
               <el-input v-model="poForm.delayDays" placeholder="请输入延长的天数" disabled></el-input>
             </div>
           </el-form-item>
+          <!-- <el-form-item prop="isAppend">
+            <el-checkbox v-model="poForm.isAppend" @change="poItemChange">邮件正文</el-checkbox>
+          </el-form-item>-->
+          <el-form-item prop="mailContent">
+            <el-checkbox v-model="poForm.isAppend" @change="poItemChange">邮件正文</el-checkbox>
+            <div v-if="poForm.isAppend === true">
+              <el-input
+                v-model="poForm.mailContent"
+                type="textarea"
+                autosize
+                clearable
+                placeholder="请输入内容"
+              ></el-input>
+            </div>
+            <div v-else>
+              <el-input
+                v-model="poForm.mailContent"
+                type="textarea"
+                autosize
+                clearable
+                disabled
+                placeholder="请输入内容"
+              ></el-input>
+            </div>
+          </el-form-item>
         </el-form>
         <!-- Table -->
-        <el-button type="text" @click="outerVisible = true">打开嵌套表格的 Dialog</el-button>
+        <el-button type="text" @click="outerVisible = true">查看上次上传订单数据</el-button>
 
         <el-dialog title="以下为上传WO的汇总数据" :visible.sync="outerVisible" width="80%">
           <el-dialog title="WO明细数据" :visible.sync="innerVisible" append-to-body width="100%">
@@ -131,11 +138,11 @@
               <el-table-column property="wafer_id" label="晶圆ID" show-overflow-tooltip></el-table-column>
               <el-table-column property="good_dies" label="良品DIES" show-overflow-tooltip></el-table-column>
               <el-table-column property="ng_dies" label="NGDIES" show-overflow-tooltip></el-table-column>
-              <el-table-column property="gross_dies" label="总DIES" show-overflow-tooltip></el-table-column>
+              <!-- <el-table-column property="gross_dies" label="总DIES" show-overflow-tooltip></el-table-column> -->
               <el-table-column property="mark_code" label="打标码" show-overflow-tooltip></el-table-column>
-              <el-table-column property="second_code" label="二级代码" show-overflow-tooltip></el-table-column>
+              <!-- <el-table-column property="second_code" label="二级代码" show-overflow-tooltip></el-table-column>
               <el-table-column property="upload_by" label="上传人员" show-overflow-tooltip></el-table-column>
-              <el-table-column property="upload_date" label="上传日期" show-overflow-tooltip></el-table-column>
+              <el-table-column property="upload_date" label="上传日期" show-overflow-tooltip></el-table-column>-->
             </el-table>
           </el-dialog>
           <el-table
@@ -246,6 +253,7 @@
               <el-progress
                 v-if="scope.row.show_progress_flag"
                 :percentage="scope.row.load_progress"
+                :format="format"
               ></el-progress>
             </template>
           </el-table-column>
@@ -394,6 +402,9 @@ export default {
             trigger: "blur"
           }
         ],
+        mailContent: [
+          { required: false, message: "请填写邮件正文提醒", trigger: "blur" }
+        ],
         poPrice: [
           {
             required: false,
@@ -417,6 +428,7 @@ export default {
         isDelay: false,
         delayDays: "",
         isBonded: "",
+        isAppend: false,
         mailContent: ""
       },
       poTemplate: { custCode: "", poType: "普通销售订单" },
@@ -450,7 +462,6 @@ export default {
   // 创建钩子函数
   created() {
     this.$axios.get("http://10.160.31.115:5000/cust_list").then(res => {
-      console.log(res.data);
       this.custCodeList = res.data;
     });
   },
@@ -489,12 +500,6 @@ export default {
           this.authenStatus = 1;
         }
       });
-      // if (this.poForm.poType == "") {
-      //   alert("请选择订单类型");
-      //   this.authenStatus = 0;
-      // } else {
-      //   this.authenStatus = 1;
-      // }
     },
     handleBeforeupload() {
       console.log("before upload");
@@ -509,7 +514,6 @@ export default {
       this.$axios
         .get("http://10.160.31.115:5000/update_progress?userKey=" + row.file_id)
         .then(res => {
-          console.log(res);
           row.load_progress = parseInt(res.data);
 
           if (row.load_progress >= 100) {
@@ -520,7 +524,6 @@ export default {
         });
     },
     handleSuccess(res, file, fileList, row) {
-      console.log("返回结果", res);
       row.show_filelist_flag = true;
       row.show_progress_flag = false;
       // 1.成功提示
@@ -573,12 +576,16 @@ export default {
       );
     },
     poItemChange() {
-      console.log("PO ITEM变化");
-
       if (this.poForm.isDelay) {
         this.rules.delayDays[0].required = true;
       } else {
         this.rules.delayDays[0].required = false;
+      }
+
+      if (this.poForm.isAppend) {
+        this.rules.mailContent[0].required = true;
+      } else {
+        this.rules.mailContent[0].required = false;
       }
 
       if (this.poForm.poType === "RMA收费订单") {
