@@ -46,6 +46,24 @@
             </el-select>
           </el-form-item>
 
+          <el-form-item label="保税/非保" prop="isBonded">
+            <el-select
+              v-model="poForm.isBonded"
+              placeholder="请选择"
+              filterable
+              clearable
+              @change="poItemChange"
+              ref="selBonded"
+            >
+              <el-option
+                v-for="item in poBondedList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+
           <el-form-item label="报价单号" prop="poPrice">
             <el-input
               v-model="poForm.poPrice"
@@ -67,16 +85,16 @@
           </el-form-item>
         </el-form>
         <el-divider content-position="left">文件上传</el-divider>
-
+        <!-- <el-loadProgress :text-inside="true" :stroke-width="24" :percentage="loadProgress" status="success"></el-loadProgress> -->
         <!-- 2.模板文件上传 -->
         <el-table :data="tableData" style="width: 100%">
-          <el-table-column label="序号" width="180">
+          <el-table-column label="序号" width="60">
             <template slot-scope="scope">
               <i class="el-icon-time"></i>
               <span style="margin-left: 10px">{{ scope.$index + 1 }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="模板文件(可下载)" width="180">
+          <el-table-column label="模板文件(可下载)">
             <template slot-scope="scope">
               <el-link
                 :href="scope.row.file_url"
@@ -85,7 +103,7 @@
               >{{scope.row.file_name}}</el-link>
             </template>
           </el-table-column>
-          <el-table-column label="模板示意(可参考)" width="180">
+          <el-table-column label="模板示意(可参考)">
             <template slot-scope="scope">
               <el-popover trigger="focus" placement="top">
                 <img :src="scope.row.img_url" />
@@ -121,12 +139,17 @@
                 name="poFile"
                 :data="poForm"
                 :disabled="authenStatus==0?true:false"
+                :show-file-list="showFileListFlag"
                 :accept="scope.row.accept"
                 action="http://10.160.31.115:5000/upload_po_file"
                 :limit="1"
                 :on-preview="handlePreview"
                 :on-remove="handleRemove"
                 :on-exceed="handleExceed"
+                :on-success="handleSuccess"
+                :on-change="handleChange"
+                :on-progress="handleProgress"
+                :before-upload="handleBeforeupload"
                 :file-list="fileList"
               >
                 <el-button
@@ -136,6 +159,7 @@
                   @click="handleUpload(scope.row)"
                 >选取文件</el-button>
               </el-upload>
+              <el-progress v-if="progressFlag" :percentage="loadProgress"></el-progress>
             </template>
           </el-table-column>
         </el-table>
@@ -259,6 +283,10 @@
 export default {
   data() {
     return {
+      progressFlag: false,
+      showFileListFlag: false,
+      loadProgress: 0,
+      timer: "",
       input: "",
       selFile: "",
       authenStatus: 1,
@@ -270,6 +298,13 @@ export default {
         ],
         poType: [
           { required: true, message: "请选择订单类型", trigger: "blur" }
+        ],
+        isBonded: [
+          {
+            required: true,
+            message: "请选择保税类型",
+            trigger: "blur"
+          }
         ],
         poPrice: [
           {
@@ -292,7 +327,8 @@ export default {
         poType: "普通销售订单",
         poPrice: "",
         isDelay: false,
-        delayDays: ""
+        delayDays: "",
+        isBonded: ""
       },
       poTemplate: { custCode: "", poType: "普通销售订单" },
       custCodeList: [],
@@ -302,6 +338,10 @@ export default {
         { value: "RMA收费订单", label: "RMA收费订单" },
         { value: "RMA免费订单", label: "RMA免费订单" },
         { value: "免费订单", label: "免费订单" }
+      ],
+      poBondedList: [
+        { value: "保税", label: "保税" },
+        { value: "非保税", label: "非保税" }
       ],
       tableData: [],
       tableData2: [
@@ -348,7 +388,11 @@ export default {
       this.fileList = [];
     },
     handleUpload(row) {
-      console.log(row);
+      if (this.fileList.length > 0) {
+        this.authenStatus = 0;
+        return false;
+      }
+      console.log(this.fileList.length);
       this.poForm["templateId"] = row.file_id;
       this.$refs.poForm.validate(vallid => {
         if (!vallid) {
@@ -363,6 +407,46 @@ export default {
       // } else {
       //   this.authenStatus = 1;
       // }
+    },
+    handleBeforeupload() {
+      console.log("before upload");
+      // this.authenStatus = 0;
+    },
+    handleProgress(event, file, fileList) {
+      // console.log("loadProgress upload");
+      this.progressFlag = true;
+      // this.loadProgress = parseInt(event.percent);
+      this.timer = setInterval(this.updateLoadProgress, 200);
+    },
+    handleChange() {},
+    updateLoadProgress() {
+      this.$axios.get("http://10.160.31.115:5000/update_progress").then(res => {
+        console.log(res);
+        this.loadProgress = res.data;
+
+        if (this.loadProgress == "100") {
+          clearInterval(this.timer);
+        }
+      });
+    },
+    handleSuccess(res) {
+      console.log(res);
+      if (res == "success") {
+        this.showFileListFlag = true;
+        this.progressFlag = false;
+        // 1.成功提示
+        this.$message({
+          message: "订单上传成功",
+          type: "success",
+          duration: 800
+        });
+      } else {
+        this.$message({
+          message: res,
+          type: "error",
+          duration: 800
+        });
+      }
     },
     handleRemove(file, fileList) {
       console.log(file, fileList);
