@@ -85,7 +85,6 @@
           </el-form-item>
         </el-form>
         <el-divider content-position="left">文件上传</el-divider>
-        <!-- <el-loadProgress :text-inside="true" :stroke-width="24" :percentage="loadProgress" status="success"></el-loadProgress> -->
         <!-- 2.模板文件上传 -->
         <el-table :data="tableData" style="width: 100%">
           <el-table-column label="序号" width="60">
@@ -139,16 +138,16 @@
                 name="poFile"
                 :data="poForm"
                 :disabled="authenStatus==0?true:false"
-                :show-file-list="showFileListFlag"
+                :show-file-list="scope.row.show_filelist_flag"
                 :accept="scope.row.accept"
                 action="http://10.160.31.115:5000/upload_po_file"
                 :limit="1"
                 :on-preview="handlePreview"
                 :on-remove="handleRemove"
                 :on-exceed="handleExceed"
-                :on-success="handleSuccess"
+                :on-success="(response, file, fileList)=>{handleSuccess(response, file, fileList, scope.row)}"
                 :on-change="handleChange"
-                :on-progress="handleProgress"
+                :on-progress="(event, file, fileList)=>{handleProgress(event, file, fileList, scope.row)}"
                 :before-upload="handleBeforeupload"
                 :file-list="fileList"
               >
@@ -156,16 +155,19 @@
                   slot="trigger"
                   size="small"
                   type="success"
-                  @click="handleUpload(scope.row)"
+                  @click="uploadPoClick(scope.row)"
                 >选取文件</el-button>
               </el-upload>
-              <el-progress v-if="progressFlag" :percentage="loadProgress"></el-progress>
+              <el-progress
+                v-if="scope.row.show_progress_flag"
+                :percentage="scope.row.load_progress"
+              ></el-progress>
             </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
       <el-tab-pane label="模板配置" name="second">
-        <el-form
+        <!-- <el-form
           :inline="true"
           :model="poTemplate"
           class="demo-form-inline"
@@ -262,7 +264,7 @@
               ></el-option>
             </el-select>
           </el-table-column>
-        </el-table>
+        </el-table>-->
 
         <!-- 模板配置 -->
       </el-tab-pane>
@@ -283,9 +285,6 @@
 export default {
   data() {
     return {
-      progressFlag: false,
-      showFileListFlag: false,
-      loadProgress: 0,
       timer: "",
       input: "",
       selFile: "",
@@ -381,19 +380,18 @@ export default {
         .then(res => {
           console.log(res.data);
           this.tableData = res.data;
+          console.log(this.tableData);
         });
 
       // 清除上传列表
       // this.$refs.upload.clearFiles();
       this.fileList = [];
     },
-    handleUpload(row) {
-      if (this.fileList.length > 0) {
-        this.authenStatus = 0;
-        return false;
-      }
-      console.log(this.fileList.length);
+
+    // 点击上传入口
+    uploadPoClick(row) {
       this.poForm["templateId"] = row.file_id;
+      this.poForm["userUploadRandom"] = row.file_id.toString();
       this.$refs.poForm.validate(vallid => {
         if (!vallid) {
           this.authenStatus = 0;
@@ -410,30 +408,41 @@ export default {
     },
     handleBeforeupload() {
       console.log("before upload");
-      // this.authenStatus = 0;
     },
-    handleProgress(event, file, fileList) {
-      // console.log("loadProgress upload");
-      this.progressFlag = true;
-      // this.loadProgress = parseInt(event.percent);
-      this.timer = setInterval(this.updateLoadProgress, 200);
+    handleProgress(event, file, fileList, row) {
+      console.log("测试正在进行");
+      row.show_progress_flag = true;
+      let user_id;
+      user_id = row.file_id;
+      this.timer = setInterval(this.updateLoadProgress, 200, user_id, row);
     },
     handleChange() {},
-    updateLoadProgress() {
-      this.$axios.get("http://10.160.31.115:5000/update_progress").then(res => {
-        console.log(res);
-        this.loadProgress = res.data;
+    updateLoadProgress(user_id, row) {
+      // this.timer = setInterval(function() {
+      //   console.log(user_id);
+      //   this.$axios
+      //     .get("http://10.160.31.115:5000/update_progress?userKey=3")
+      //     .then(res => {
+      //       console.log(res);
+      //     });
+      // }, 200);
 
-        if (this.loadProgress == "100") {
-          clearInterval(this.timer);
-        }
-      });
+      this.$axios
+        .get("http://10.160.31.115:5000/update_progress?userKey=" + user_id)
+        .then(res => {
+          console.log(res);
+          row.load_progress = parseInt(res.data);
+
+          if (row.load_progress >= 100) {
+            clearInterval(this.timer);
+          }
+        });
     },
-    handleSuccess(res) {
-      console.log(res);
+    handleSuccess(res, file, fileList, row) {
+      console.log(row);
       if (res == "success") {
-        this.showFileListFlag = true;
-        this.progressFlag = false;
+        row.show_filelist_flag = true;
+        row.show_progress_flag = false;
         // 1.成功提示
         this.$message({
           message: "订单上传成功",
@@ -484,16 +493,16 @@ export default {
       } else {
         this.rules.poPrice[0].required = false;
       }
-    },
-    handleChange(value) {
-      console.log(value);
-      console.log(this.num);
-      if (value > this.tableData2.length) {
-        this.tableData2.push({});
-      } else {
-        this.tableData2.pop();
-      }
     }
+    // handleChange(value) {
+    //   console.log(value);
+    //   console.log(this.num);
+    //   if (value > this.tableData2.length) {
+    //     this.tableData2.push({});
+    //   } else {
+    //     this.tableData2.pop();
+    //   }
+    // }
   }
 };
 </script>
