@@ -285,7 +285,7 @@
 export default {
   data() {
     return {
-      timer: "",
+      timer: {},
       input: "",
       selFile: "",
       authenStatus: 1,
@@ -410,31 +410,22 @@ export default {
       console.log("before upload");
     },
     handleProgress(event, file, fileList, row) {
-      console.log("测试正在进行");
       row.show_progress_flag = true;
-      let user_id;
-      user_id = row.file_id;
-      this.timer = setInterval(this.updateLoadProgress, 200, user_id, row);
+      let key = row.file_id.toString();
+      this.timer[key] = setInterval(this.updateLoadProgress, 200, row);
     },
     handleChange() {},
-    updateLoadProgress(user_id, row) {
-      // this.timer = setInterval(function() {
-      //   console.log(user_id);
-      //   this.$axios
-      //     .get("http://10.160.31.115:5000/update_progress?userKey=3")
-      //     .then(res => {
-      //       console.log(res);
-      //     });
-      // }, 200);
-
+    updateLoadProgress(row) {
       this.$axios
-        .get("http://10.160.31.115:5000/update_progress?userKey=" + user_id)
+        .get("http://10.160.31.115:5000/update_progress?userKey=" + row.file_id)
         .then(res => {
           console.log(res);
           row.load_progress = parseInt(res.data);
 
           if (row.load_progress >= 100) {
-            clearInterval(this.timer);
+            let key = row.file_id.toString();
+            clearInterval(this.timer[key]);
+            delete this.timer[key];
           }
         });
     },
