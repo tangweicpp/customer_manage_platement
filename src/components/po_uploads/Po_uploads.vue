@@ -63,7 +63,26 @@
               ></el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="邮件正文" prop="mailContent">
+            <el-col :span="50">
+              <el-input
+                v-model="poForm.mailContent"
+                type="textarea"
+                autosize
+                clearable
+                placeholder="请输入内容"
+              ></el-input>
+            </el-col>
+          </el-form-item>
+        </el-form>
 
+        <el-form
+          :inline="true"
+          :model="poForm"
+          class="demo-form-inline"
+          ref="poForm"
+          :rules="rules"
+        >
           <el-form-item label="报价单号" prop="poPrice">
             <el-input
               v-model="poForm.poPrice"
@@ -84,6 +103,72 @@
             </div>
           </el-form-item>
         </el-form>
+        <!-- Table -->
+        <el-button type="text" @click="outerVisible = true">打开嵌套表格的 Dialog</el-button>
+
+        <el-dialog title="以下为上传WO的汇总数据" :visible.sync="outerVisible" width="80%">
+          <el-dialog title="WO明细数据" :visible.sync="innerVisible" append-to-body width="100%">
+            <el-table
+              :data="gridDataDetail"
+              border
+              stripe
+              size="medium"
+              highlight-current-row
+              :header-cell-style="{background:'rgb(175, 175, 175)',color:'black'}"
+              :row-style="{height:'20px'}"
+              :cell-style="{padding:'5px 0'}"
+              show-overflow-tooltip
+            >
+              <el-table-column property="id" label="序号" show-overflow-tooltip width="50"></el-table-column>
+              <el-table-column property="po_id" label="PO" show-overflow-tooltip></el-table-column>
+              <el-table-column property="cust_code" label="客户代码" show-overflow-tooltip></el-table-column>
+              <el-table-column property="fab_device" label="FAB机种" show-overflow-tooltip></el-table-column>
+              <el-table-column property="cust_device" label="客户机种" show-overflow-tooltip></el-table-column>
+              <el-table-column property="npi_owner" label="NPI负责人" show-overflow-tooltip></el-table-column>
+              <el-table-column property="ht_pn" label="厂内机种" show-overflow-tooltip></el-table-column>
+              <el-table-column property="lot_id" label="LOTID" show-overflow-tooltip></el-table-column>
+              <el-table-column property="wafer_no" label="WAFER ID" show-overflow-tooltip></el-table-column>
+              <el-table-column property="wafer_id" label="晶圆ID" show-overflow-tooltip></el-table-column>
+              <el-table-column property="good_dies" label="良品DIES" show-overflow-tooltip></el-table-column>
+              <el-table-column property="ng_dies" label="NGDIES" show-overflow-tooltip></el-table-column>
+              <el-table-column property="gross_dies" label="总DIES" show-overflow-tooltip></el-table-column>
+              <el-table-column property="mark_code" label="打标码" show-overflow-tooltip></el-table-column>
+              <el-table-column property="second_code" label="二级代码" show-overflow-tooltip></el-table-column>
+              <el-table-column property="upload_by" label="上传人员" show-overflow-tooltip></el-table-column>
+              <el-table-column property="upload_date" label="上传日期" show-overflow-tooltip></el-table-column>
+            </el-table>
+          </el-dialog>
+          <el-table
+            :data="gridDataTotal"
+            border
+            stripe
+            size="medium"
+            highlight-current-row
+            :header-cell-style="{background:'rgb(175, 175, 175)',color:'black'}"
+            :row-style="{height:'20px'}"
+            :cell-style="{padding:'5px 0'}"
+            show-overflow-tooltip
+          >
+            <el-table-column property="id" label="序号" show-overflow-tooltip width="50"></el-table-column>
+            <el-table-column property="po_id" label="PO" show-overflow-tooltip></el-table-column>
+            <el-table-column property="banded" label="保税非保" show-overflow-tooltip></el-table-column>
+            <el-table-column property="cust_code" label="客户代码" show-overflow-tooltip></el-table-column>
+            <el-table-column property="cust_device" label="客户机种" show-overflow-tooltip></el-table-column>
+            <el-table-column property="fab_device" label="FAB机种" show-overflow-tooltip></el-table-column>
+            <el-table-column property="ht_pn" label="厂内机种" show-overflow-tooltip></el-table-column>
+            <el-table-column property="wafer_pn" label="晶圆料号" show-overflow-tooltip></el-table-column>
+            <el-table-column property="lot_id" label="LOTID" show-overflow-tooltip></el-table-column>
+            <el-table-column property="wafer_qty" label="wafer片" show-overflow-tooltip></el-table-column>
+            <el-table-column property="die_qty" label="die数" show-overflow-tooltip></el-table-column>
+            <el-table-column property="upload_by" label="上传人员"></el-table-column>
+            <el-table-column property="upload_date" label="上传日期"></el-table-column>-->
+          </el-table>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="outerVisible = false">取 消</el-button>
+            <el-button type="primary" @click="innerVisible = true">查看明细数据</el-button>
+          </div>
+        </el-dialog>
+
         <el-divider content-position="left">文件上传</el-divider>
         <!-- 2.模板文件上传 -->
         <el-table :data="tableData" style="width: 100%">
@@ -285,6 +370,10 @@
 export default {
   data() {
     return {
+      gridDataTotal: [],
+      gridDataDetail: [],
+      innerVisible: false,
+      outerVisible: false,
       timer: {},
       input: "",
       selFile: "",
@@ -327,7 +416,8 @@ export default {
         poPrice: "",
         isDelay: false,
         delayDays: "",
-        isBonded: ""
+        isBonded: "",
+        mailContent: ""
       },
       poTemplate: { custCode: "", poType: "普通销售订单" },
       custCodeList: [],
@@ -430,23 +520,35 @@ export default {
         });
     },
     handleSuccess(res, file, fileList, row) {
-      console.log(row);
-      if (res == "success") {
-        row.show_filelist_flag = true;
-        row.show_progress_flag = false;
-        // 1.成功提示
-        this.$message({
-          message: "订单上传成功",
-          type: "success",
-          duration: 800
-        });
-      } else {
-        this.$message({
-          message: res,
-          type: "error",
-          duration: 800
-        });
-      }
+      console.log("返回结果", res);
+      row.show_filelist_flag = true;
+      row.show_progress_flag = false;
+      // 1.成功提示
+      this.$message({
+        message: "订单上传成功",
+        type: "success",
+        duration: 800
+      });
+
+      this.gridDataTotal = res.total_data;
+      this.gridDataDetail = res.detail_data;
+      this.outerVisible = true;
+      // if (res == "success") {
+      //   row.show_filelist_flag = true;
+      //   row.show_progress_flag = false;
+      //   // 1.成功提示
+      //   this.$message({
+      //     message: "订单上传成功",
+      //     type: "success",
+      //     duration: 800
+      //   });
+      // } else {
+      //   this.$message({
+      //     message: res,
+      //     type: "error",
+      //     duration: 800
+      //   });
+      // }
     },
     handleRemove(file, fileList) {
       console.log(file, fileList);
@@ -499,12 +601,46 @@ export default {
 </script>
 
 <style>
-.el-table .warning-row {
+/* .el-table .warning-row {
   background: oldlace;
 }
 
 .el-table .success-row {
   background: #f0f9eb;
+}
+
+.el-table td,
+.el-table th.is-leaf,
+.el-table--border,
+.el-table--group {
+  border-color: black;
+}
+.el-table--border::after,
+.el-table--group::after,
+.el-table::before {
+  background-color: black;
+} */
+
+.el-table--border:after,
+.el-table--group:after,
+.el-table:before {
+  background-color: red;
+}
+.el-table--border,
+.el-table--group {
+  border-color: red;
+}
+.el-table td,
+.el-table th.is-leaf {
+  border-bottom: 1px solid red;
+}
+.el-table--border th,
+.el-table--border th.gutter:last-of-type {
+  border-bottom: 1px solid red;
+}
+.el-table--border td,
+.el-table--border th {
+  border-right: 1px solid red;
 }
 
 .demo-table-expand {
