@@ -1,7 +1,6 @@
 <div>
     <el-tabs v-model="activeName" @tab-click="handleClick">
       <el-tab-pane label="普通上传" name="first">
-        <!-- 转换-上传选项  -->
         <el-form
           :inline="true"
           :model="poForm"
@@ -71,9 +70,6 @@
               :disabled="!this.rules.poPrice[0].required"
             ></el-input>
           </el-form-item>
-          <!-- <el-form-item prop="isDelay">
-            <el-checkbox v-model="poForm.isDelay" @change="poItemChange">延长账期</el-checkbox>
-          </el-form-item>-->
           <el-form-item prop="delayDays">
             <el-checkbox v-model="poForm.isDelay" @change="poItemChange">延长账期</el-checkbox>
             <div v-if="poForm.isDelay === true">
@@ -83,9 +79,7 @@
               <el-input v-model="poForm.delayDays" placeholder="请输入延长的天数" disabled></el-input>
             </div>
           </el-form-item>
-          <!-- <el-form-item prop="isAppend">
-            <el-checkbox v-model="poForm.isAppend" @change="poItemChange">邮件正文</el-checkbox>
-          </el-form-item>-->
+
           <el-form-item prop="mailContent">
             <el-checkbox v-model="poForm.isAppend" @change="poItemChange">邮件正文</el-checkbox>
             <div v-if="poForm.isAppend === true">
@@ -137,11 +131,7 @@
               <el-table-column property="wafer_id" label="晶圆ID" show-overflow-tooltip></el-table-column>
               <el-table-column property="good_dies" label="良品DIES" show-overflow-tooltip></el-table-column>
               <el-table-column property="ng_dies" label="NGDIES" show-overflow-tooltip></el-table-column>
-              <!-- <el-table-column property="gross_dies" label="总DIES" show-overflow-tooltip></el-table-column> -->
               <el-table-column property="mark_code" label="打标码" show-overflow-tooltip></el-table-column>
-              <!-- <el-table-column property="second_code" label="二级代码" show-overflow-tooltip></el-table-column>
-              <el-table-column property="upload_by" label="上传人员" show-overflow-tooltip></el-table-column>
-              <el-table-column property="upload_date" label="上传日期" show-overflow-tooltip></el-table-column>-->
             </el-table>
           </el-dialog>
           <el-table
@@ -258,117 +248,8 @@
           </el-table-column>
         </el-table>
       </el-tab-pane>
-      <el-tab-pane label="模板配置" name="second">
-        <!-- <el-form
-          :inline="true"
-          :model="poTemplate"
-          class="demo-form-inline"
-          ref="poTemplate"
-          :rules="rules"
-        >
-          <el-form-item label="客户代码" prop="custCode">
-            <el-select
-              v-model="poTemplate.custCode"
-              placeholder="请选择"
-              filterable
-              clearable
-              ref="selCustCode"
-            >
-              <el-option
-                v-for="item in custCodeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="订单类型" prop="poType">
-            <el-select
-              v-model="poTemplate.poType"
-              placeholder="请选择"
-              filterable
-              clearable
-              ref="selPoType"
-            >
-              <el-option
-                v-for="item in poTypeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="文件数量" prop="poType">
-            <el-input-number v-model="num" @change="handleChange" :min="1" :max="3" label="描述文字"></el-input-number>
-          </el-form-item>
-        </el-form>
-
-        <el-table :data="tableData2" border style="width: 100%">
-          <el-table-column label="序号" width="180">
-            <template slot-scope="scope">
-              <i class="el-icon-time"></i>
-              <span style="margin-left: 10px">{{ scope.$index + 1 }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="模板文件" width="180">
-            <template slot-scope="scope">
-              <el-upload
-                class="upload-demo"
-                action="https://jsonplaceholder.typicode.com/posts/"
-                :on-preview="handlePreview"
-                :on-remove="handleRemove"
-                :before-remove="beforeRemove"
-                multiple
-                :limit="3"
-                :on-exceed="handleExceed"
-                :file-list="fileList"
-              >
-                <el-button size="small" type="primary">点击上传</el-button>
-                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-              </el-upload>
-            </template>
-          </el-table-column>
-          <el-table-column prop="address" label="模板示意">
-            <template slot-scope="scope">
-              <el-upload
-                class="upload-demo"
-                action="https://jsonplaceholder.typicode.com/posts/"
-                :on-preview="handlePreview"
-                :on-remove="handleRemove"
-                :file-list="fileList"
-                list-type="picture"
-              >
-                <el-button size="small" type="primary">点击上传</el-button>
-                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-              </el-upload>
-            </template>
-          </el-table-column>
-          <el-table-column prop="address" label="关键字段">
-            <el-button type="text" size="small">编辑</el-button>
-          </el-table-column>
-          <el-table-column prop="address" label="文件层级">
-            <el-select v-model="value" placeholder="请选择">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
-          </el-table-column>
-        </el-table>-->
-
-        <!-- 模板配置 -->
-      </el-tab-pane>
+      <el-tab-pane label="模板配置" name="second"></el-tab-pane>
       <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
       <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
     </el-tabs>
-
-    <!-- <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
-      <span>这是一段信息</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-      </span>
-    </el-dialog>-->
 </div>

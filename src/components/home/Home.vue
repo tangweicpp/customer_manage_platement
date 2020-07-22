@@ -28,7 +28,7 @@
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-sold-out"></i>
-              <span>销售出货</span>
+              <span>销售部</span>
             </template>
             <el-submenu index="1-1">
               <template slot="title">
@@ -163,14 +163,14 @@ export default {
       this.$confirm("此操作将退出该账户, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning"
+        type: "warning",
       })
         .then(() => {
           // 1.提示
           this.$message({
             type: "success",
             message: "退出成功!",
-            duration: 800
+            duration: 800,
           });
           // 2.跳转到Login页
           this.$router.push("/login");
@@ -179,11 +179,11 @@ export default {
           this.$message({
             type: "info",
             message: "已取消退出",
-            duration: 800
+            duration: 800,
           });
         });
-    }
-  }
+    },
+  },
 };
 </script>
 
