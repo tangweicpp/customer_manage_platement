@@ -2,8 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
-// 引入路由 进行挂载
-import router from './router/router.js'
+
 // 引入element-ui
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
@@ -15,6 +14,8 @@ import axios from 'axios'
 import qs from 'qs'
 // 防止多次点击,重复提交
 import preventReClick from './store/preventReClick'
+// 引入路由 进行挂载
+import router from './router/router.js'
 
 Vue.prototype.$axios = axios;
 Vue.prototype.$qs = qs;

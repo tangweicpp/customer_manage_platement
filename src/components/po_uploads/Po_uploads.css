@@ -1,0 +1,54 @@
+/* .el-table .warning-row {
+  background: oldlace;
+}
+
+.el-table .success-row {
+  background: #f0f9eb;
+}
+
+.el-table td,
+.el-table th.is-leaf,
+.el-table--border,
+.el-table--group {
+  border-color: black;
+}
+.el-table--border::after,
+.el-table--group::after,
+.el-table::before {
+  background-color: black;
+} */
+
+.el-table--border:after, .el-table--group:after, .el-table:before {
+    background-color: red;
+}
+
+.el-table--border, .el-table--group {
+    border-color: red;
+}
+
+.el-table td, .el-table th.is-leaf {
+    border-bottom: 1px solid red;
+}
+
+.el-table--border th, .el-table--border th.gutter:last-of-type {
+    border-bottom: 1px solid red;
+}
+
+.el-table--border td, .el-table--border th {
+    border-right: 1px solid red;
+}
+
+.demo-table-expand {
+    font-size: 0;
+}
+
+.demo-table-expand label {
+    width: 90px;
+    color: #99a9bf;
+}
+
+.demo-table-expand .el-form-item {
+    margin-right: 0;
+    margin-bottom: 0;
+    width: 50%;
+}

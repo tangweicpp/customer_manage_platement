@@ -5,9 +5,9 @@ import VueRouter from 'vue-router'
 import Home from '../components/home/Home.vue'
 import Login from '../components/login/Login.vue'
 import Users from '../components/users/Users.vue'
-import Po_uploads from '../components/po_uploads/Po_uploads'
-import Po_keyin from '../components/po_keyin/Po_keyin'
-import Po_view from '../components/po_view/Po_view'
+import Po_uploads from '../components/po_uploads/Po_uploads.vue'
+import Po_keyin from '../components/po_keyin/Po_keyin.vue'
+import Po_view from '../components/po_view/Po_view.vue'
 
 // 在模块化工程中use
 Vue.use(VueRouter)
