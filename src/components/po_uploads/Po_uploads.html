@@ -1,24 +1,24 @@
 <div>
-    <el-tabs v-model="activeName" @tab-click="handleClick">
+    <el-tabs v-model="activeName" @tab-click="handleClickTabs">
       <el-tab-pane label="普通上传" name="first">
         <el-form
           :inline="true"
-          :model="poForm"
+          :model="formData"
           class="demo-form-inline"
-          ref="poForm"
+          ref="formData"
           :rules="rules"
         >
           <el-form-item label="客户代码" prop="custCode">
             <el-select
-              v-model="poForm.custCode"
+              v-model="formData.custCode"
               placeholder="请选择"
               filterable
               clearable
-              @change="handleCustCodeChange"
+              @change="getCustPOTemplate"
               ref="selCustCode"
             >
               <el-option
-                v-for="item in custCodeList"
+                v-for="item in formItemCustCode"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -28,7 +28,7 @@
 
           <el-form-item label="订单类型" prop="poType">
             <el-select
-              v-model="poForm.poType"
+              v-model="formData.poType"
               placeholder="请选择"
               filterable
               clearable
@@ -36,7 +36,7 @@
               ref="selPoType"
             >
               <el-option
-                v-for="item in poTypeList"
+                v-for="item in formItemPOType"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -44,9 +44,9 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="保税/非保" prop="isBonded">
+          <el-form-item label="保税/非保" prop="bondedType">
             <el-select
-              v-model="poForm.isBonded"
+              v-model="formData.bondedType"
               placeholder="请选择"
               filterable
               clearable
@@ -54,7 +54,7 @@
               ref="selBonded"
             >
               <el-option
-                v-for="item in poBondedList"
+                v-for="item in formItemBonded"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -62,29 +62,29 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="报价单号" prop="poPrice">
+          <el-form-item label="报价单号" prop="offerSheet">
             <el-input
-              v-model="poForm.poPrice"
+              v-model="formData.offerSheet"
               clearable
               placeholder="请输入内容"
-              :disabled="!this.rules.poPrice[0].required"
+              :disabled="!this.rules.offerSheet[0].required"
             ></el-input>
           </el-form-item>
           <el-form-item prop="delayDays">
-            <el-checkbox v-model="poForm.isDelay" @change="poItemChange">延长账期</el-checkbox>
-            <div v-if="poForm.isDelay === true">
-              <el-input v-model="poForm.delayDays" placeholder="请输入延长的天数"></el-input>
+            <el-checkbox v-model="formData.needDelay" @change="poItemChange">延长账期</el-checkbox>
+            <div v-if="formData.needDelay === true">
+              <el-input v-model="formData.delayDays" placeholder="请输入延长的天数"></el-input>
             </div>
             <div v-else>
-              <el-input v-model="poForm.delayDays" placeholder="请输入延长的天数" disabled></el-input>
+              <el-input v-model="formData.delayDays" placeholder="请输入延长的天数" disabled></el-input>
             </div>
           </el-form-item>
 
-          <el-form-item prop="mailContent">
-            <el-checkbox v-model="poForm.isAppend" @change="poItemChange">邮件正文</el-checkbox>
-            <div v-if="poForm.isAppend === true">
+          <el-form-item prop="mailTip">
+            <el-checkbox v-model="formData.needMailTip" @change="poItemChange">邮件正文</el-checkbox>
+            <div v-if="formData.needMailTip === true">
               <el-input
-                v-model="poForm.mailContent"
+                v-model="formData.mailTip"
                 type="textarea"
                 autosize
                 clearable
@@ -93,7 +93,7 @@
             </div>
             <div v-else>
               <el-input
-                v-model="poForm.mailContent"
+                v-model="formData.mailTip"
                 type="textarea"
                 autosize
                 clearable
@@ -217,7 +217,7 @@
                 class="upload-demo"
                 ref="upload"
                 name="poFile"
-                :data="poForm"
+                :data="formData"
                 :disabled="authenStatus==0?true:false"
                 :show-file-list="scope.row.show_filelist_flag"
                 :accept="scope.row.accept"
@@ -226,6 +226,7 @@
                 :on-preview="handlePreview"
                 :on-remove="handleRemove"
                 :on-exceed="handleExceed"
+                :on-error="handleError"
                 :on-success="(response, file, fileList)=>{handleSuccess(response, file, fileList, scope.row)}"
                 :on-change="handleChange"
                 :on-progress="(event, file, fileList)=>{handleProgress(event, file, fileList, scope.row)}"
@@ -236,8 +237,8 @@
                   slot="trigger"
                   size="small"
                   type="success"
-                  :disabled="btnChangeEnable"
-                  @click="uploadPoClick(scope.row)"
+                  :disabled="btnEnable"
+                  @click="handleClickUpload(scope.row)"
                 >选取文件</el-button>
               </el-upload>
               <el-progress

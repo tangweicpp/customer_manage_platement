@@ -1,17 +1,43 @@
 export default {
   data() {
     return {
-      btnChangeEnable: false,
+      activeName: "first",
+      // 1.普通上传
+      btnEnable: false,
+      authenStatus: 1,
       gridDataTotal: [],
       gridDataDetail: [],
       innerVisible: false,
       outerVisible: false,
       timer: {},
-      input: "",
-      selFile: "",
-      authenStatus: 1,
-      // dialogVisible: false,
-      activeName: "first",
+
+      formData: {
+        userName: "",
+        custCode: "",
+        poType: "普通销售订单",
+        bondedType: "",
+        offerSheet: "",
+        needDelay: false,
+        delayDays: "",
+        needMailTip: false,
+        mailTip: "",
+        fileID: ""
+      },
+      formItemCustCode: [],
+      formItemPOType: [
+        { value: "普通销售订单", label: "普通销售订单" },
+        { value: "工程批订单", label: "工程批订单" },
+        { value: "RMA收费订单", label: "RMA收费订单" },
+        { value: "RMA免费订单", label: "RMA免费订单" },
+        { value: "免费订单", label: "免费订单" }
+      ],
+      formItemBonded: [
+        { value: "保税", label: "保税" },
+        { value: "非保税", label: "非保税" }
+      ],
+      tableData: [],
+
+      fileList: [],
       rules: {
         custCode: [
           { required: true, message: "请选择客户代码", trigger: "blur" }
@@ -19,17 +45,17 @@ export default {
         poType: [
           { required: true, message: "请选择订单类型", trigger: "blur" }
         ],
-        isBonded: [
+        bondedType: [
           {
             required: true,
             message: "请选择保税类型",
             trigger: "blur"
           }
         ],
-        mailContent: [
+        mailTip: [
           { required: false, message: "请填写邮件正文提醒", trigger: "blur" }
         ],
-        poPrice: [
+        offerSheet: [
           {
             required: false,
             message: "请填写报价单号",
@@ -45,85 +71,46 @@ export default {
           }
         ]
       },
-      poForm: {
-        custCode: "",
-        poType: "普通销售订单",
-        poPrice: "",
-        isDelay: false,
-        delayDays: "",
-        isBonded: "",
-        isAppend: false,
-        mailContent: "",
-        userName: ""
-      },
+
+      // 2.模板配置
+      fileNum: 1,
       poTemplate: { custCode: "", poType: "普通销售订单" },
-      custCodeList: [],
-      poTypeList: [
-        { value: "普通销售订单", label: "普通销售订单" },
-        { value: "工程批订单", label: "工程批订单" },
-        { value: "RMA收费订单", label: "RMA收费订单" },
-        { value: "RMA免费订单", label: "RMA免费订单" },
-        { value: "免费订单", label: "免费订单" }
-      ],
-      poBondedList: [
-        { value: "保税", label: "保税" },
-        { value: "非保税", label: "非保税" }
-      ],
-      tableData: [],
-      tableData2: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        }
-      ],
-
-      fileList: [],
-
-      // 模板数据
-      num: 1
+      tableData2: [],
     };
   },
-  // 创建钩子函数
   created() {
     this.$axios.get("http://10.160.31.115:5000/cust_list").then(res => {
-      this.custCodeList = res.data;
+      this.formItemCustCode = res.data;
     });
-    this.poForm.userName = localStorage.getItem("userName")
-    if (this.poForm.userName == null || this.poForm.userName == "" || this.poForm.userName == undefined) {
-      // 2.跳转到Login页
+    this.formData.userName = localStorage.getItem("userName")
+    if (this.formData.userName == null || this.formData.userName == "" || this.formData.userName == undefined) {
       this.$router.push("/login");
     }
   },
   methods: {
-    handleClick(tab, event) {
+    handleClickTabs(tab, event) {
       // console.log(tab, event);
     },
-    handleCustCodeChange() {
-      // 获取客户资料
+    getCustPOTemplate() {
       this.$axios
         .post(
           "http://10.160.31.115:5000/po_template",
           this.$qs.stringify({
-            custcode: this.poForm.custCode
+            custcode: this.formData.custCode
           })
         )
         .then(res => {
-          // console.log(res.data);
           this.tableData = res.data;
-          // console.log(this.tableData);
         });
 
       // 清除上传列表
-      // this.$refs.upload.clearFiles();
       this.fileList = [];
     },
 
     // 点击上传入口
-    uploadPoClick(row) {
-      this.poForm["templateId"] = row.file_id;
-      this.poForm["userUploadRandom"] = row.file_id.toString();
-      this.$refs.poForm.validate(vallid => {
+    handleClickUpload(row) {
+      this.formData.fileID = row.file_id.toString();
+      this.$refs.formData.validate(vallid => {
         if (!vallid) {
           this.authenStatus = 0;
           console.log(row);
@@ -137,16 +124,12 @@ export default {
     },
     handleBeforeupload() {
       // console.log("before upload");
-      this.btnChangeEnable = true;
+      this.btnEnable = true;
     },
     handleProgress(event, file, fileList, row) {
       row.show_progress_flag = true;
       let key = row.file_id.toString();
       this.timer[key] = setInterval(this.updateLoadProgress, 200, row);
-    },
-    handleChange(files, fileList) {
-      // console.log("file", files.length);
-      // console.log("fileList", fileList.length);
     },
     updateLoadProgress(row) {
       this.$axios
@@ -161,10 +144,17 @@ export default {
           }
         });
     },
+    handleChange(files, fileList) {
+      // console.log("file", files.length);
+      // console.log("fileList", fileList.length);
+    },
     handleSuccess(res, file, fileList, row) {
-      this.btnChangeEnable = false;
+      this.btnEnable = false;
       row.show_filelist_flag = true;
       row.show_progress_flag = false;
+      let key = row.file_id.toString();
+      clearInterval(this.timer[key]);
+      delete this.timer[key];
       // 1.成功提示
       this.$message({
         message: "订单上传成功",
@@ -174,22 +164,9 @@ export default {
       this.gridDataTotal = res.total_data;
       this.gridDataDetail = res.detail_data;
       this.outerVisible = true;
-      // if (res == "success") {
-      //   row.show_filelist_flag = true;
-      //   row.show_progress_flag = false;
-      //   // 1.成功提示
-      //   this.$message({
-      //     message: "订单上传成功",
-      //     type: "success",
-      //     duration: 800
-      //   });
-      // } else {
-      //   this.$message({
-      //     message: res,
-      //     type: "error",
-      //     duration: 800
-      //   });
-      // }
+    },
+    handleError(err, file, fileList) {
+      console.log("文件上传失败")
     },
     handleRemove(file, fileList) {
       console.log(file, fileList);
@@ -214,27 +191,27 @@ export default {
       );
     },
     poItemChange() {
-      if (this.poForm.isDelay) {
+      if (this.formData.needDelay) {
         this.rules.delayDays[0].required = true;
       } else {
         this.rules.delayDays[0].required = false;
       }
 
-      if (this.poForm.isAppend) {
-        this.rules.mailContent[0].required = true;
+      if (this.formData.needMailTip) {
+        this.rules.mailTip[0].required = true;
       } else {
-        this.rules.mailContent[0].required = false;
+        this.rules.mailTip[0].required = false;
       }
 
-      if (this.poForm.poType === "RMA收费订单") {
-        this.rules.poPrice[0].required = true;
+      if (this.formData.poType === "RMA收费订单") {
+        this.rules.offerSheet[0].required = true;
       } else {
-        this.rules.poPrice[0].required = false;
+        this.rules.offerSheet[0].required = false;
       }
     }
     // handleChange(value) {
     //   console.log(value);
-    //   console.log(this.num);
+    //   console.log(this.fileNum);
     //   if (value > this.tableData2.length) {
     //     this.tableData2.push({});
     //   } else {
