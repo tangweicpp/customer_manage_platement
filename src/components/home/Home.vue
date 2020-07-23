@@ -156,7 +156,11 @@ export default {
   },
   created() {
     this.userName = localStorage.getItem("userName");
-    console.log("获取的用户名:", this.userName);
+    if (this.userName == null || this.userName == "" || this.userName == undefined) {
+      // 2.跳转到Login页
+      this.$router.push("/login");
+    }
+    // console.log("获取的用户名:", this.userName);
   },
   methods: {
     // 展开

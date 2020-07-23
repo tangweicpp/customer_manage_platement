@@ -90,6 +90,10 @@ export default {
       this.custCodeList = res.data;
     });
     this.poForm.userName = localStorage.getItem("userName")
+    if (this.poForm.userName == null || this.poForm.userName == "" || this.poForm.userName == undefined) {
+      // 2.跳转到Login页
+      this.$router.push("/login");
+    }
   },
   methods: {
     handleClick(tab, event) {
