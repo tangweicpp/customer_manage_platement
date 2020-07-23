@@ -150,7 +150,7 @@ export default {
         .get("http://10.160.31.115:5000/update_progress?userKey=" + row.file_id)
         .then(res => {
           console.log(res)
-          row.load_progress = parseInt(res.data.file_id);
+          row.load_progress = parseInt(res.data.progress);
 
           if (row.load_progress >= 100) {
             let key = row.file_id.toString();
