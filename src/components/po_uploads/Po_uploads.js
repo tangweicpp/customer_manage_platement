@@ -79,13 +79,18 @@ export default {
     };
   },
   created() {
-    this.$axios.get("http://10.160.31.115:5000/cust_list").then(res => {
-      this.formItemCustCode = res.data;
-    });
     this.formData.userName = localStorage.getItem("userName")
     if (this.formData.userName == null || this.formData.userName == "" || this.formData.userName == undefined) {
       this.$router.push("/login");
+      return false;
     }
+
+    this.$axios.get("http://10.160.31.115:5000/cust_code_list").then(res => {
+      console.log(res);
+      if (res.status === 200) {
+        this.formItemCustCode = res.data;
+      }
+    });
   },
   methods: {
     handleClickTabs(tab, event) {
@@ -96,11 +101,21 @@ export default {
         .post(
           "http://10.160.31.115:5000/po_template",
           this.$qs.stringify({
-            custcode: this.formData.custCode
+            custCode: this.formData.custCode
           })
         )
         .then(res => {
-          this.tableData = res.data;
+          console.log(res)
+          console.log(this.tableData)
+
+          if (res.status === 200) {
+            this.tableData = res.data;
+          }
+          else {
+            this.tableData = [];
+          }
+        }).catch(function (error) {
+          console.log(error);
         });
 
       // 清除上传列表
@@ -109,11 +124,10 @@ export default {
 
     // 点击上传入口
     handleClickUpload(row) {
-      this.formData.fileID = row.file_id.toString();
+      this.formData.fileID = row.file_id;
       this.$refs.formData.validate(vallid => {
         if (!vallid) {
           this.authenStatus = 0;
-          console.log(row);
         } else {
           this.authenStatus = 1;
           this.fileList = [];
@@ -128,14 +142,15 @@ export default {
     },
     handleProgress(event, file, fileList, row) {
       row.show_progress_flag = true;
-      let key = row.file_id.toString();
-      this.timer[key] = setInterval(this.updateLoadProgress, 200, row);
+      let key = row.file_id;
+      this.timer[key] = setInterval(this.updateLoadProgress, 300, row);
     },
     updateLoadProgress(row) {
       this.$axios
-        .get("http://10.160.31.115:5000/update_progress?userKey=" + row.file_id.toString())
+        .get("http://10.160.31.115:5000/update_progress?userKey=" + row.file_id)
         .then(res => {
-          row.load_progress = parseInt(res.data);
+          console.log(res)
+          row.load_progress = parseInt(res.data.file_id);
 
           if (row.load_progress >= 100) {
             let key = row.file_id.toString();
