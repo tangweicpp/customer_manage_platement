@@ -9,7 +9,7 @@
           <h1>客户管理平台</h1>
         </el-col>
         <el-col :span="8" class="col_r">
-          用户名：admin
+          当前用户:{{ userName }}
           <a href="#" @click.prevent="logout">退出</a>
         </el-col>
       </el-row>
@@ -149,6 +149,15 @@
 
 <script>
 export default {
+  data() {
+    return {
+      userName: "",
+    };
+  },
+  created() {
+    this.userName = localStorage.getItem("userName");
+    console.log("获取的用户名:", this.userName);
+  },
   methods: {
     // 展开
     handleOpen() {

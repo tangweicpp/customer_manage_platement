@@ -30,22 +30,24 @@ export default {
     return {
       ruleForm: {
         username: "",
-        password: ""
+        password: "",
       },
       rules: {
         username: [
           { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
+          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" },
         ],
-        password: [{ required: true, message: "请输入密码", trigger: "change" }]
-      }
+        password: [
+          { required: true, message: "请输入密码", trigger: "change" },
+        ],
+      },
     };
   },
   // 创建钩子函数
   created() {
     // 注册回车登录
     var _self = this;
-    document.onkeydown = function(e) {
+    document.onkeydown = function (e) {
       var key = window.event.keyCode;
       if (key == 13 || key == 100) {
         _self.startLogin();
@@ -54,21 +56,25 @@ export default {
   },
   methods: {
     startLogin() {
-      this.$refs.ruleForm.validate(valid => {
+      this.$refs.ruleForm.validate((valid) => {
         if (valid) {
           this.$axios
             .post(
               "http://10.160.31.115:5000/login",
               this.$qs.stringify(this.ruleForm)
             )
-            .then(res => {
+            .then((res) => {
               console.log(res.data);
               if (res.data === "success") {
+                // 0.Save
+                localStorage.setItem("userName", this.ruleForm.username);
+                console.log("当前登录用户：", this.ruleForm.username);
+
                 // 1.成功提示
                 this.$message({
                   message: "登录成功",
                   type: "success",
-                  duration: 800
+                  duration: 800,
                 });
 
                 // 2.跳转到home页
@@ -77,15 +83,46 @@ export default {
                 this.$message({
                   message: res.data,
                   type: "error",
-                  duration: 800
+                  duration: 800,
                 });
               }
             });
+          // let param = new URLSearchParams();
+          // param.append("username", this.ruleForm.username);
+          // param.append("password", this.ruleForm.password);
+          // this.$axios
+          //   .get("http://10.160.31.115:5000/login", {
+          //     params: param,
+          //   })
+          //   .then((res) => {
+          //     console.log(res.data);
+          //     if (res.data === "success") {
+          //       // 0.Save
+          //       localStorage.setItem("userName", this.ruleForm.username);
+          //       console.log("当前登录用户：", this.ruleForm.username);
+
+          //       // 1.成功提示
+          //       this.$message({
+          //         message: "登录成功",
+          //         type: "success",
+          //         duration: 800,
+          //       });
+
+          //       // 2.跳转到home页
+          //       this.$router.push("/home");
+          //     } else {
+          //       this.$message({
+          //         message: res.data,
+          //         type: "error",
+          //         duration: 800,
+          //       });
+          //     }
+          //   });
         } else {
           this.$message({
             message: "请输入账号和密码",
             type: "error",
-            duration: 800
+            duration: 800,
           });
           return false;
         }
@@ -93,8 +130,8 @@ export default {
     },
     resetForm() {
       this.$refs.ruleForm.resetFields();
-    }
-  }
+    },
+  },
 };
 </script>
 
