@@ -133,7 +133,7 @@ export default {
     },
     updateLoadProgress(row) {
       this.$axios
-        .get("http://10.160.31.115:5000/update_progress?userKey=" + row.file_id)
+        .get("http://10.160.31.115:5000/update_progress?userKey=" + row.file_id.toString())
         .then(res => {
           row.load_progress = parseInt(res.data);
 
