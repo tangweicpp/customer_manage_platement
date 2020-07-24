@@ -168,7 +168,7 @@ export default {
         this.$message({
           message: res.err_desc,
           type: "error",
-          duration: 1000
+          duration: 2000
         });
         // 2.delete timer
         let key = row.file_id.toString();
