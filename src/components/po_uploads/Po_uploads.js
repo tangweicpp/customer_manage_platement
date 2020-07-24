@@ -3,7 +3,7 @@ export default {
     return {
       activeName: "first",
       // 1.普通上传
-      btnEnable: false,
+      btnDisable: false,
       authenStatus: 1,
       gridDataTotal: [],
       gridDataDetail: [],
@@ -86,7 +86,6 @@ export default {
     }
 
     this.$axios.get("http://10.160.31.115:5000/cust_code_list").then(res => {
-      console.log(res);
       if (res.status === 200) {
         this.formItemCustCode = res.data;
       }
@@ -97,6 +96,7 @@ export default {
       // console.log(tab, event);
     },
     getCustPOTemplate() {
+      // 发送请求
       this.$axios
         .post(
           "http://10.160.31.115:5000/po_template",
@@ -105,14 +105,8 @@ export default {
           })
         )
         .then(res => {
-          console.log(res)
-          console.log(this.tableData)
-
           if (res.status === 200) {
             this.tableData = res.data;
-          }
-          else {
-            this.tableData = [];
           }
         }).catch(function (error) {
           console.log(error);
@@ -137,10 +131,12 @@ export default {
       });
     },
     handleBeforeupload() {
-      // console.log("before upload");
-      this.btnEnable = true;
+      console.log("before upload");
+      // 判断文件大小
+      this.btnDisable = true;
     },
     handleProgress(event, file, fileList, row) {
+      console.log("handleProgress");
       row.show_progress_flag = true;
       let key = row.file_id;
       this.timer[key] = setInterval(this.updateLoadProgress, 300, row);
@@ -149,26 +145,48 @@ export default {
       this.$axios
         .get("http://10.160.31.115:5000/update_progress?userKey=" + row.file_id)
         .then(res => {
-          console.log(res)
           row.load_progress = parseInt(res.data.progress);
 
           if (row.load_progress >= 100) {
-            let key = row.file_id.toString();
+            let key = row.file_id;
             clearInterval(this.timer[key]);
             delete this.timer[key];
           }
         });
     },
     handleChange(files, fileList) {
+      console.log("handleChange");
+
       // console.log("file", files.length);
       // console.log("fileList", fileList.length);
     },
     handleSuccess(res, file, fileList, row) {
-      this.btnEnable = false;
-      row.show_filelist_flag = true;
-      row.show_progress_flag = false;
+      console.log("handleSuccess", res);
+      this.btnDisable = false;
+      if (res.status === 201) {
+        // 1.错误提示
+        this.$message({
+          message: res.err_desc,
+          type: "error",
+          duration: 1000
+        });
+        // 2.delete timer
+        let key = row.file_id.toString();
+        clearInterval(this.timer[key]);
+        console.log("delete timer")
+        delete this.timer[key];
+
+        // 3.delete filelist
+        this.fileList = [];
+
+        return false
+      }
+
+      row.load_progress = 100;
+      // 0.delete timer
       let key = row.file_id.toString();
       clearInterval(this.timer[key]);
+      console.log("delete timer")
       delete this.timer[key];
       // 1.成功提示
       this.$message({
@@ -176,12 +194,24 @@ export default {
         type: "success",
         duration: 800
       });
-      this.gridDataTotal = res.total_data;
-      this.gridDataDetail = res.detail_data;
+
       this.outerVisible = true;
+      row.show_filelist_flag = true;
+      row.show_progress_flag = false;
+      this.gridDataTotal = res.data.total_data;
+      this.gridDataDetail = res.data.detail_data;
     },
-    handleError(err, file, fileList) {
+    handleError(err, file, fileList, row) {
+      console.log("handleError");
       console.log("文件上传失败")
+      this.btnDisable = false;
+      row.load_progress = 0;
+      // 1.delete timer
+      let key = row.file_id.toString();
+      clearInterval(this.timer[key]);
+      delete this.timer[key];
+      // 2.delete filelist
+      this.fileList = [];
     },
     handleRemove(file, fileList) {
       console.log(file, fileList);

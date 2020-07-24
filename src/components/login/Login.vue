@@ -64,11 +64,9 @@ export default {
               this.$qs.stringify(this.ruleForm)
             )
             .then((res) => {
-              console.log(res.data);
-              if (res.data === "success") {
+              if (res.status === 200) {
                 // 0.Save
                 localStorage.setItem("userName", this.ruleForm.username);
-                console.log("当前登录用户：", this.ruleForm.username);
 
                 // 1.成功提示
                 this.$message({

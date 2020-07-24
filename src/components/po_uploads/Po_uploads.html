@@ -226,18 +226,18 @@
                 :on-preview="handlePreview"
                 :on-remove="handleRemove"
                 :on-exceed="handleExceed"
-                :on-error="handleError"
-                :on-success="(response, file, fileList)=>{handleSuccess(response, file, fileList, scope.row)}"
+                :before-upload="handleBeforeupload"
                 :on-change="handleChange"
                 :on-progress="(event, file, fileList)=>{handleProgress(event, file, fileList, scope.row)}"
-                :before-upload="handleBeforeupload"
+                :on-success="(response, file, fileList)=>{handleSuccess(response, file, fileList, scope.row)}"
+                :on-error="(err, file, fileList)=>{handleError(err, file, fileList, scope.row)}"
                 :file-list="fileList"
               >
                 <el-button
                   slot="trigger"
                   size="small"
                   type="success"
-                  :disabled="btnEnable"
+                  :disabled="btnDisable"
                   @click="handleClickUpload(scope.row)"
                 >选取文件</el-button>
               </el-upload>
