@@ -81,7 +81,7 @@
           </el-form-item>
 
           <el-form-item prop="mailTip">
-            <el-checkbox v-model="formData.needMailTip" @change="poItemChange">邮件正文</el-checkbox>
+            <el-checkbox v-model="formData.needMailTip" @change="poItemChange">邮件提醒</el-checkbox>
             <div v-if="formData.needMailTip === true">
               <el-input
                 v-model="formData.mailTip"
