@@ -3,6 +3,7 @@ export default {
     return {
       activeName: "first",
       // 1.普通上传
+      uploadUrl: this.$Api.globalUrl + "/upload_po_file",
       btnDisable: false,
       authenStatus: 1,
       gridDataTotal: [],
@@ -85,7 +86,7 @@ export default {
       return false;
     }
 
-    this.$axios.get("http://10.160.31.115:5000/cust_code_list").then(res => {
+    this.$axios.get(this.$Api.globalUrl + "/cust_code_list").then(res => {
       if (res.status === 200) {
         this.formItemCustCode = res.data;
       }
@@ -99,7 +100,7 @@ export default {
       // 发送请求
       this.$axios
         .post(
-          "http://10.160.31.115:5000/po_template",
+          this.$Api.globalUrl + "/po_template",
           this.$qs.stringify({
             custCode: this.formData.custCode
           })
@@ -143,7 +144,7 @@ export default {
     },
     updateLoadProgress(row) {
       this.$axios
-        .get("http://10.160.31.115:5000/update_progress?userKey=" + row.file_id)
+        .get(this.$Api.globalUrl + "/update_progress?userKey=" + row.file_id)
         .then(res => {
           row.load_progress = parseInt(res.data.progress);
 

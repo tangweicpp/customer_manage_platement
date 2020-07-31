@@ -16,6 +16,10 @@ import qs from 'qs'
 import preventReClick from './store/preventReClick'
 // 引入路由 进行挂载
 import router from './router/router.js'
+// 引入全局api
+import Api from "./interface/index"
+
+Vue.prototype.$Api = Api;
 
 Vue.prototype.$axios = axios;
 Vue.prototype.$qs = qs;
@@ -27,6 +31,7 @@ Vue.config.productionTip = false
 new Vue({
   router,
   el: '#app',
+  Api,
   components: { App },
   template: '<App/>'
 })

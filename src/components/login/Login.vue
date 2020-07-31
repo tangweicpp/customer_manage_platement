@@ -58,9 +58,10 @@ export default {
     startLogin() {
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
+          console.log(this.$Api);
           this.$axios
             .post(
-              "http://10.160.31.115:5000/login",
+              this.$Api.globalUrl + "/login",
               this.$qs.stringify(this.ruleForm)
             )
             .then((res) => {
@@ -85,37 +86,6 @@ export default {
                 });
               }
             });
-          // let param = new URLSearchParams();
-          // param.append("username", this.ruleForm.username);
-          // param.append("password", this.ruleForm.password);
-          // this.$axios
-          //   .get("http://10.160.31.115:5000/login", {
-          //     params: param,
-          //   })
-          //   .then((res) => {
-          //     console.log(res.data);
-          //     if (res.data === "success") {
-          //       // 0.Save
-          //       localStorage.setItem("userName", this.ruleForm.username);
-          //       console.log("当前登录用户：", this.ruleForm.username);
-
-          //       // 1.成功提示
-          //       this.$message({
-          //         message: "登录成功",
-          //         type: "success",
-          //         duration: 800,
-          //       });
-
-          //       // 2.跳转到home页
-          //       this.$router.push("/home");
-          //     } else {
-          //       this.$message({
-          //         message: res.data,
-          //         type: "error",
-          //         duration: 800,
-          //       });
-          //     }
-          //   });
         } else {
           this.$message({
             message: "请输入账号和密码",

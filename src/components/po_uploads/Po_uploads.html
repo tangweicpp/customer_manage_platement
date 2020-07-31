@@ -221,7 +221,7 @@
                 :disabled="authenStatus==0?true:false"
                 :show-file-list="scope.row.show_filelist_flag"
                 :accept="scope.row.accept"
-                action="http://10.160.31.115:5000/upload_po_file"
+                :action= "uploadUrl"
                 :limit="1"
                 :on-preview="handlePreview"
                 :on-remove="handleRemove"
