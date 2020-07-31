@@ -158,8 +158,6 @@ export default {
     handleChange(files, fileList) {
       console.log("handleChange");
 
-      // console.log("file", files.length);
-      // console.log("fileList", fileList.length);
     },
     handleSuccess(res, file, fileList, row) {
       console.log("handleSuccess", res);
