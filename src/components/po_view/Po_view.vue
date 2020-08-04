@@ -30,11 +30,15 @@
           <el-table-column label="客户代码" width="120">
             <template slot-scope="scope">{{ scope.row.cust_code }}</template>
           </el-table-column>
+          <el-table-column prop="cust_pn" label="客户机种" show-overflow-tooltip></el-table-column>
+
           <el-table-column label="客户lot" width="120">
             <template slot-scope="scope">{{ scope.row.lot_id }}</template>
           </el-table-column>
 
           <el-table-column prop="wafer_id" label="waferid" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="is_worked" label="是否开工单" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="upload_id" label="上传ID" show-overflow-tooltip></el-table-column>
         </el-table>
       </el-tab-pane>
     </el-tabs>
